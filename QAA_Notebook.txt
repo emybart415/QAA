@@ -1,0 +1,480 @@
+QAA Lab Notebook
+```
+My Files:
+
+19_3F_fox_S14_L008
+/projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz
+/projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz
+2_2B_control_S2_L008
+/projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz
+/projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz
+
+FASTqc can just be run on interactive mode:
+$srun --account=bgmp -p compute --time=3:00:00 --pty bash
+$module spider fastqc
+- from output: copy and paste "$module load fastqc/0.11.5"
+$module list
+- to see which modules you currently have installed
+
+----------------------------------------------------------------------
+Running FastQC
+----------------------------------------------------------------------
+FastQC will accept multiple file names as input, so we can use the *.fq wildcard.
+$ fastqc *.fastq
+***Starting with .gz files, dont need to put zcat in the front
+***--threads=2 will allow files to run in paralell
+
+#Can create a .sh script
+$ exit  #exit the current interactive session
+$ srun --pty -c 6 -p interactive -t 0-12:00 --mem 1G --reservation=HBC2 /bin/bash  #start a new one with 6 cpus (-n 6) and 1G RAM (--mem 1G)
+$ module load fastqc/0.11.5  #reload the module for the new session
+$ cd ~/chipseq/raw_data
+$ fastqc -t 6 *.fastq  #note the extra parameter we specified for 6 threads
+
+#First File [[/usr/bin/time -v]]
+$fastqc /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz --outdir=/projects/bgmp/ebart/bioinfo/Bi623/QAA/fox --threads=2
+#Second File
+$fastqc /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz --outdir=/projects/bgmp/ebart/bioinfo/Bi623/QAA/control --threads=2
+
+Created outputs in the following folders:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/control
+-2_2B_control_S2_L008_R1_001_fastqc.html
+-2_2B_control_S2_L008_R1_001_fastqc.zip
+-2_2B_control_S2_L008_R2_001_fastqc.html
+-2_2B_control_S2_L008_R2_001_fastqc.zip
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/fox
+-19_3F_fox_S14_L008_R1_001_fastqc.html
+-19_3F_fox_S14_L008_R1_001_fastqc.zip
+-19_3F_fox_S14_L008_R2_001_fastqc.html
+-19_3F_fox_S14_L008_R2_001_fastqc.zip
+
+----------------------------------------------------------------------
+Quality Score Plotting
+----------------------------------------------------------------------
+Python and .sh script to do this found at:
+    -/projects/bgmp/ebart/bioinfo/Bi622/Demultiplex/Demultiplex/Assignment-the-first/demultiplex_A1P1.py
+    -/projects/bgmp/ebart/bioinfo/Bi622/Demultiplex/Demultiplex/Assignment-the-first/A1P1.sh
+-Copy these scripts into the QAA file folder on talapas
+-Adjust .sh file
+-Bring in bioinfo module from:
+    -/projects/bgmp/ebart/bioinfo/Bi622/Demultiplex/Demultiplex/bioinfo.py
+Notes from last time:
+- For the bash scripy you need to go in and change:
+    -#SBATCH --error=R4_error.err the name of the error
+    - '-f' location of the input fastq file 
+    - '-l' read length of sequence in fatsq file
+    - '-o' location and the name you want your output file to be, should reflect name of input file 
+
+JOBS:
+1: Control R1
+    -49945
+    Command being timed: "/projects/bgmp/ebart/bioinfo/Bi623/QAA/demultiplex_A1P1.py -f /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz -l 101 -o /projects/bgmp/ebart/b$
+        User time (seconds): 89.23
+        System time (seconds): 0.78
+        Percent of CPU this job got: 98%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:31.62
+        Maximum resident set size (kbytes): 62272
+        Exit status: 0
+    -Output File:/projects/bgmp/ebart/bioinfo/Bi623/QAA/control/ControlR1_results.png
+2: Control R2
+    -49951
+     Command being timed: "/projects/bgmp/ebart/bioinfo/Bi623/QAA/demultiplex_A1P1.py -f /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz -l 101 -o /projects/bgmp/ebart/b$
+        User time (seconds): 86.71
+        System time (seconds): 1.19
+        Percent of CPU this job got: 94%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:33.31
+        Maximum resident set size (kbytes): 61956
+        Exit status: 0
+    -Output File:/projects/bgmp/ebart/bioinfo/Bi623/QAA/control/ControlR2_results.png
+3: Fox R1
+    -49963
+    Command being timed: "/projects/bgmp/ebart/bioinfo/Bi622/Demultiplex/Demultiplex/Assignment-the-first/demultiplex_A1P1.py -f /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fa$
+        User time (seconds): 227.44
+        System time (seconds): 1.99
+        Percent of CPU this job got: 98%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 3:53.99
+        Maximum resident set size (kbytes): 65504
+        Exit status: 0
+    -Output File:/projects/bgmp/ebart/bioinfo/Bi623/QAA/fox/FoxR1_results.png
+4: Fox R2
+    -49965
+       Command being timed: "/projects/bgmp/ebart/bioinfo/Bi622/Demultiplex/Demultiplex/Assignment-the-first/demultiplex_A1P1.py -f /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fa$
+        User time (seconds): 233.39
+        System time (seconds): 1.19
+        Percent of CPU this job got: 99%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 3:55.13
+        Maximum resident set size (kbytes): 64040
+        Exit status: 0
+    -Output File:/projects/bgmp/ebart/bioinfo/Bi623/QAA/fox/FoxR2_results.png
+(-p interactive --reservation=bgmp-res)
+squeue --start
+----------------------------------------------------------------------
+Conda Environment QAA
+----------------------------------------------------------------------
+- Installed cutadapt version 4.4
+- Installed Trimmomatic version 0.39
+-To activate: conda activate QAA
+----------------------------------------------------------------------
+cutadapt To trim a 3’ adapter
+----------------------------------------------------------------------
+Adapters:
+R1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+R2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+How to run:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA.cutadapt.sh
+    cutadapt (**no dash because it is the command)
+    -a R1 adapter
+    -A R2 adapter
+    -o output directory for read 1
+    -p output directory for read 2
+    r1 file r2 file
+JOB 55597:
+Command being timed: "cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R1.fastq.gz -p /projects/bgmp/eb$
+        User time (seconds): 145.60
+        System time (seconds): 0.22
+        Percent of CPU this job got: 97%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 2:28.92
+        Maximum resident set size (kbytes): 40008
+        Exit status: 0
+        Command being timed: "cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R1.fastq.gz -p /projects/bgmp/ebart/$
+        User time (seconds): 405.92
+        System time (seconds): 0.55
+        Percent of CPU this job got: 99%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 6:47.45
+        Maximum resident set size (kbytes): 45620
+        Exit status: 0
+
+=== Summary CONTROL ===
+Total read pairs processed:          5,830,665
+  Read 1 with adapter:                 423,128 (7.3%)
+  Read 2 with adapter:                 473,368 (8.1%)
+Pairs written (passing filters):     5,830,665 (100.0%)
+
+Total basepairs processed: 1,177,794,330 bp
+  Read 1:   588,897,165 bp
+  Read 2:   588,897,165 bp
+Total written (filtered):  1,160,435,631 bp (98.5%)
+  Read 1:   580,298,948 bp
+  Read 2:   580,136,683 bp
+
+=== Summary FOX ===
+Total read pairs processed:         16,348,255
+  Read 1 with adapter:                 546,623 (3.3%)
+  Read 2 with adapter:                 676,564 (4.1%)
+Pairs written (passing filters):    16,348,255 (100.0%)
+
+Total basepairs processed: 3,302,347,510 bp
+  Read 1: 1,651,173,755 bp
+  Read 2: 1,651,173,755 bp
+Total written (filtered):  3,294,067,204 bp (99.7%)
+  Read 1: 1,647,303,006 bp
+  Read 2: 1,646,764,198 bp
+
+Output Files:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R1.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R2.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R1.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R2.fastq.gz
+
+Proportion of reads trimmed
+19_3F_fox_S14_L008
+/projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz
+/projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz
+2_2B_control_S2_L008
+/projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz
+/projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz
+
+FOX_R1 FOX_R2
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz | wc -l -> 65,393,020
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz | c -l -> 65,393,020
+CONTROL_R1 CONTROL_R2
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz | wc -l -> 23,322,660
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz | wc -l -> 23,322,660
+
+
+# of Adapter Sequences in files 
+FOX_R1
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz | grep "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA" | wc -l
+13819
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R1_001.fastq.gz | grep "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT" | wc -l
+0
+
+FOX_R2
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz | grep "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA" | wc -l
+0
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/19_3F_fox_S14_L008_R2_001.fastq.gz | grep "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT" | wc -l
+14775
+
+CONTROL_R1
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz | grep "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA" | wc -l
+31917
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R1_001.fastq.gz | grep "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT" | wc -l
+0
+CONTROL_R2
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz | grep "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA" |wc -l
+0
+zcat /projects/bgmp/shared/2017_sequencing/demultiplexed/2_2B_control_S2_L008_R2_001.fastq.gz | grep "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT" |wc -l
+31965
+
+----------------------------------------------------------------------
+Trimmomatic to quality trim your reads
+----------------------------------------------------------------------
+LEADING: quality of 3
+TRAILING: quality of 3
+SLIDING WINDOW: window size of 5 and required quality of 15
+MINLENGTH: 35 bases
+
+Script to run: /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic.sh
+How to run:
+trimmomatic PE 
+-phred33 (if not specified it will be determined automatically)
+input_forward.fastq.gz
+input_reverse.fastq.gz
+output_forward_paired.fastq.gz
+output_forward_unpaired.fastq.gz
+output_reverse_paired.fastq.gz
+output_reverse_unpaired.fastq.gz
+ILLUMINACLIP:NexteraPE-PE.fa:2:30:10
+LEADING:3 
+TRAILING:3 
+SLIDINGWINDOW:5:15 
+MINLEN:35
+
+JOB: 56062
+TrimmomaticPE: Started with arguments:
+ -phred33 /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R1.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R2.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_unpaired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_unpaired.fastq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:5:15 MINLEN:35
+Multiple cores found: Using 4 threads
+        Input Read Pairs: 5830665 
+        Both Surviving: 5652538 (96.94%) 
+        Forward Only Surviving: 133553 (2.29%) 
+        Reverse Only Surviving: 4598 (0.08%) 
+        Dropped: 39976 (0.69%)
+TrimmomaticPE: Completed successfully
+	Command being timed: "trimmomatic PE -phred33 /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R1.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_control_R2.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_unpaired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_unpaired.fastq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:5:15 MINLEN:35"
+	User time (seconds): 303.57
+	System time (seconds): 5.49
+	Percent of CPU this job got: 215%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:23.50
+	Maximum resident set size (kbytes): 403336
+	Exit status: 0
+JOB: 56068
+TrimmomaticPE: Started with arguments:
+ -phred33 /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R1.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R2.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_unpaired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_unpaired.fastq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:5:15 MINLEN:35
+Multiple cores found: Using 4 threads
+        Input Read Pairs: 16348255
+        Both Surviving: 15899268 (97.25%)
+        Forward Only Surviving: 428450 (2.62%)
+        Reverse Only Surviving: 14868 (0.09%)
+        Dropped: 5669 (0.03%)
+TrimmomaticPE: Completed successfully
+	Command being timed: "trimmomatic PE -phred33 /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R1.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/cutadapt/cutadapt_fox_R2.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_unpaired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_unpaired.fastq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:5:15 MINLEN:35"
+	User time (seconds): 875.03
+	System time (seconds): 16.73
+	Percent of CPU this job got: 215%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 6:52.90
+	Maximum resident set size (kbytes): 399368
+	Exit status: 0
+Output Files:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_paired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_paired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_paired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_paired.fastq.gz
+
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_unpaired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_unpaired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_unpaired.fastq.gz
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_unpaired.fastq.gz
+
+
+
+----------------------------------------------------------------------
+Plot the trimmed read length distributions for both R1 and R2 reads
+----------------------------------------------------------------------
+Script found at:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/rl_distribution.py
+Use code from ICA4: 
+zcat /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_paired.fastq.gz | sed -n "2~4p" | awk '{print length($0)}' | sort | uniq -c | sort -h | awk -v OFS='\t' '{ print $1, $2 }' > control_fwd_paired.tsv
+zcat /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_paired.fastq.gz | sed -n "2~4p" | awk '{print length($0)}' | sort | uniq -c | sort -h | awk -v OFS='\t' '{ print $1, $2 }' > control_rev_paired.tsv
+zcat /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_paired.fastq.gz | sed -n "2~4p" | awk '{print length($0)}' | sort | uniq -c | sort -h | awk -v OFS='\t' '{ print $1, $2 }' > fox_fwd_paired.tsv
+zcat /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_paired.fastq.gz | sed -n "2~4p" | awk '{print length($0)}' | sort | uniq -c | sort -h | awk -v OFS='\t' '{ print $1, $2 }' > fox_rev_paired.tsv
+
+Outfiles:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/control_rldist.png
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/fox_rldist.png
+
+----------------------------------------------------------------------
+Alignment and strand-specificity STAR
+----------------------------------------------------------------------
+Install in QAA Env:
+- star
+- numpy
+- matplotlib
+- htseq
+
+STAR
+Script location: 
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/star.sh
+Primary Assembaly: /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz 
+GTF File: /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf.gz
+
+	Command being timed: "STAR --runThreadN 8 --runMode genomeGenerate --genomeDir /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_output --genomeFastaFiles /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.dna.primary_assembly.fa --sjdbGTFfile /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf"
+	User time (seconds): 4914.10
+	System time (seconds): 38.18
+	Percent of CPU this job got: 373%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 22:06.27
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 32380716
+	Exit status: 0
+
+STAR Alignment
+Script location:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align.sh
+
+Control Files: /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align
+	Command being timed: "STAR --runThreadN 8 --runMode alignReads --outFilterMultimapNmax 3 --outSAMunmapped Within KeepPairs --alignIntronMax 1000000 --alignMatesGapMax 1000000 --readFilesCommand zcat --readFilesIn /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/control_rev_paired.fastq.gz --genomeDir /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_output --outFileNamePrefix align_control"
+	User time (seconds): 283.38
+	System time (seconds): 8.44
+	Percent of CPU this job got: 530%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:54.96
+	Maximum resident set size (kbytes): 27388176
+	Exit status: 0
+Fox Files: /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align
+	Command being timed: "STAR --runThreadN 8 --runMode alignReads --outFilterMultimapNmax 3 --outSAMunmapped Within KeepPairs --alignIntronMax 1000000 --alignMatesGapMax 1000000 --readFilesCommand zcat --readFilesIn /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_fwd_paired.fastq.gz /projects/bgmp/ebart/bioinfo/Bi623/QAA/trimmomatic/fox_rev_paired.fastq.gz --genomeDir /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_output --outFileNamePrefix align_fox"
+	User time (seconds): 934.12
+	System time (seconds): 12.28
+	Percent of CPU this job got: 621%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:32.39
+	Maximum resident set size (kbytes): 27514076
+	Exit status: 0
+
+Mapped vs Unmapped:
+Script used:/projects/bgmp/ebart/bioinfo/Bi623/QAA/mapped_unmapped.py
+
+Control:
+"Mapped Reads:11078806"
+"Unmapped Reads:226270"
+Fox:
+"Mapped Reads:30512174"
+"Unmapped Reads:1286362"
+
+----------------------------------------------------------------------
+HTSEQ
+----------------------------------------------------------------------
+-Count reads that map to features using htseq-count.
+You should run htseq-count twice: once with --stranded=yes
+and again with --stranded=reverse. Use default parameters otherwise.
+
+Script:
+/projects/bgmp/ebart/bioinfo/Bi623/QAA/htseq.sh
+
+CONTROL:
+Stranded=yes
+OUT: htseqcontrol_yes.txt
+	Command being timed: "htseq-count --format sam --stranded=yes /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align/align_controlAligned.out.sam /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf --samout=htseqcontrol.txt"
+	User time (seconds): 852.57
+	System time (seconds): 3.14
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:23.41
+	Maximum resident set size (kbytes): 173264
+	Exit status: 0
+          __no_feature	4960672
+          __ambiguous	8445
+          __too_low_aQual	4760
+          __not_aligned	110515
+          __alignment_not_unique	347951
+
+Reads that mapped to a feature:
+Command:
+cat mouseSaline1_fw.genecount | grep -v "^__" | awk '{sum+=$2} END {print sum}'
+cat mouseSaline1_rv.genecount | grep -v "^__" | awk '{sum+=$2} END {print sum}'
+Number of reads mapped, fw:894086
+Number of reads mapped, rv:14442057
+
+Stranded=reverse
+OUT: htseqcontrol_rev.txt
+	Command being timed: "htseq-count --format sam --stranded=reverse /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align/align_controlAligned.out.sam /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf --samout=htseqcontrol.txt"
+	User time (seconds): 876.58
+	System time (seconds): 7.53
+	Percent of CPU this job got: 98%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:54.20
+	Maximum resident set size (kbytes): 172812
+	Exit status: 0
+__no_feature	293950
+__ambiguous	89681
+__too_low_aQual	4760
+__not_aligned	110515
+__alignment_not_unique	347951
+
+FOX:
+Stranded=yes
+OUT: htseqfox_yes.txt
+	Command being timed: "htseq-count --format sam --stranded=yes /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align/align_foxAligned.out.sam /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf --samout=htseqfox_yes.txt"
+	User time (seconds): 2195.77
+	System time (seconds): 13.87
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 37:02.55
+	Maximum resident set size (kbytes): 177836
+	Exit status: 0
+__no_feature	13927178
+__ambiguous	10603
+__too_low_aQual	17434
+__not_aligned	633806
+__alignment_not_unique	764501
+
+Stranded=reverse
+OUT: htseqfox_rev.txt
+	Command being timed: "htseq-count --format sam --stranded=reverse /projects/bgmp/ebart/bioinfo/Bi623/QAA/star_align/align_foxAligned.out.sam /projects/bgmp/ebart/bioinfo/Bi623/QAA/FASTA/Mus_musculus.GRCm39.110.gtf --samout=htseqfox_rev.txt"
+	User time (seconds): 2267.19
+	System time (seconds): 14.65
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 38:13.92
+	Maximum resident set size (kbytes): 178316
+	Exit status: 0
+__no_feature	1313715
+__ambiguous	233986
+__too_low_aQual	17434
+__not_aligned	633806
+__alignment_not_unique	764501
+
+----------------------------------------------------------------------
+How many reads mapped to a feature
+----------------------------------------------------------------------
+
+
+Reads that mapped to a feature Command:
+cat <file> | grep -v "^__" | awk '{sum+=$2} END {print sum}'
+
+Total number of reads Command:
+cat <file> | awk '{sum+=$2} END {print sum}'
+
+        Control, stranded=yes
+          Number of reads mapped: 220,195
+          Total reads: 5,652,538
+
+        Control, stranded=reverse
+          Number of reads mapped: 4,805,681
+          Total reads: 5,652,538
+
+        Control, stranded=no
+          Number of reads mapped: 4,703,464
+          Total reads: 5,652,538
+
+Fox, stranded=yes
+	Number of reads mapped: 545,746
+	Total reads: 15,899,268
+
+Fox, stranded=reverse
+	Number of reads mapped: 12,935,826
+	Total reads: 15,899,268
+81.4% of rea
+
+
+For your r1 vs r2, which mapped better. That will tell you if it is stranded. If it is equally mapped
+50/50 = unstranded.
+Aligned to the egneomce but didnt get aligned to the genome: __nofeature 
+
+/Users/emilybartlett/bioinfo/Bi623/PS/QAA_h/QAA.pdf
+Is data from a “strand-specific” libraryBoth the FOX library and the CONTROL library are strand-specific. For the FOX library, when the HTSeq parameter was set to “stranded=yes” only 3.4% of readsmapped to features when compared to “stranded=reverse” where 81.4% of reads mapped to features. Forthe CONTROL library, when HTSeq was set to “stranded=yes” only 3.9% of reads mapped to features whencompared to “stranded=reverse” where 85% of reads mapped to features. For the CONTROL library I alsoran the parameter as “stranded=no”, when I did this, 83.2% of reads mapped to features. If your librarieswere stranded, you would expect to see a 50/50 split of reads mapped to total reads when you compare“stranded=yes” vs “stranded=no”, which isn’t what we see. When “stranded=yes” has a low percentage,it is because the libraries are strand specific for the reverse strand. Knowing these are kappa libraries alsosupports this. SInce illumina has trademarked stranding the forward strand, other library prep kits such askappa use reverse strand specific library preps.7
+
+
+```
